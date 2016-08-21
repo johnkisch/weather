@@ -6,9 +6,10 @@
 
 package main
 
+import "github.com/Jeffail/gabs"
 import "fmt"
 import "os"
-//import "encoding/json"
+import "encoding/json"
 import "net/http"
 import "io/ioutil"
 
@@ -16,6 +17,12 @@ import "io/ioutil"
 func do_err(){
     fmt.Println("Some error happened")
     os.Exit(1)
+}
+
+type Weather struct {
+    weather string
+    temp_f float64
+    temp_c float64
 }
 
 func main() {
@@ -28,5 +35,16 @@ func main() {
     body, err := ioutil.ReadAll(resp.Body)
     if err != nil {do_err() }
     fmt.Printf("%s", body)
+
+    jsonParsed, err := gabs.ParseJSON(body)
+
+    var conditions Weather
+
+    conditions.weather = jsonParsed.Path("current_observation.weather").Data().(string)
+    conditions.temp_f = jsonParsed.Path("current_observation.temp_f").Data().(float64)
+    conditions.temp_c = jsonParsed.Path("current_observation.temp_c").Data().(float64)
+
+    fmr.println(conditions)
+
 
 }
