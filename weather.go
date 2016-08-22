@@ -3,7 +3,7 @@
 package main
 
 import "github.com/Jeffail/gabs"
-import "flag"
+//import "flag"
 import "fmt"
 import "os"
 import "net/http"
@@ -18,25 +18,18 @@ func do_err(msg string){
 
 // structure containing parsed weather data
 type Weather struct {
-    weather string
-    temp_f float64
-    temp_c float64
+    conditions string
+    temp string
 }
 
 func main() {
-    // parse flags
-    scale := flag.String("scale", "f", "Temp in Celcius (C) or Fahrenheit (F)")
-
-    flag.Parse()
 
     // initialize argument variables
     var city, state string
 
     // assign arguments to variables
-    if flag.NArg() == 2 {
-        city  = flag.Arg(0)
-        state = flag.Arg(1)
-    }
+    city  = os.Args[1]
+    state = os.Args[2]
 
     // make HTTP GET request
     resp, err := http.Get("http://api.wunderground.com/api/a771a3d22176fe4f/conditions/q/"+ state +"/"+ city + ".json")
@@ -66,15 +59,9 @@ func main() {
 
         var conditions Weather
 
-        conditions.weather = jsonParsed.Path("current_observation.weather").Data().(string)
-        conditions.temp_f = jsonParsed.Path("current_observation.temp_f").Data().(float64)
-        conditions.temp_c = jsonParsed.Path("current_observation.temp_c").Data().(float64)
-        fmt.Println(conditions.weather)
+        conditions.conditions = jsonParsed.Path("current_observation.weather").Data().(string)
+        conditions.temp = jsonParsed.Path("current_observation.temperature_string").Data().(string)
+        fmt.Printf("%s %s", conditions.temp, conditions.conditions)
 
-        if *scale == "f"{
-            fmt.Printf("%.1f Degrees Fahrenheit", conditions.temp_f)
-        } else if *scale == "c" {
-            fmt.Printf("%.1f Degrees Celcius", conditions.temp_c)
-        }
     }
 }
